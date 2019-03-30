@@ -38,12 +38,13 @@ handleNewMessage = (channelSid, body, author) => {
         if (author !== dasby.upi ) {
             twilio.getChannelAsDasby(dasby.upi, channelSid)
             .then(currentChannel =>{
-                console.log("handleNewMessage currentChannel: ", currentChannel)
+                console.log("handleNewMessage hit")
                 // the below case will only be false if the user types a free response message (not a json object)
                 if (canParseStr(body)) {
                     //NEED TO ASK JONNY: why do some rows have a payload without a block? thats why we added the bottom
-                    if (body.chapter !== 'Survey') {
-                        dialogue.find(body.chapter, body.section, body.block || 0).then(allSectionData => {
+                    const message = JSON.parse(body)
+                    if (message.chapter !== 'Survey') {
+                        dialogue.find(message.chapter, message.section, message.block || 0).then(allSectionData => {
                             let iteration = 0;
                             let currentBlockData = allSectionData[0];
                             messageRouter(currentChannel, allSectionData, currentBlockData, iteration);
