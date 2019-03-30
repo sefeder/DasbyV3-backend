@@ -4,7 +4,6 @@ const dasbyActions = require("../../dasbyLogic/dasbyActions")
 router.route('/')
     .post(function(req,res){
         console.log("dasby post route hit!!")
-        console.log("-----req.body: ", req.body)
         dasbyActions.handleNewMessage(req.body.ChannelSid, req.body.Body, req.body.From)
         res.end()
     })
