@@ -8,7 +8,7 @@ router.route("/logIn")
     .post(userController.authenticateUser)
 
 router.route("/update")
-    .post(userController.update)
+    .post(userController.updateByUpi)
 
 router.route("/get-user")
     .post(userController.getUser)

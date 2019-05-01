@@ -47,10 +47,11 @@ module.exports = {
             res.send(error);
         })
     },
-    update: function (req, res) {
+    updateByUpi: function (req, res) {
             dbUsers.update(
                 {upi: req.body.upi},
-                { private_key: JSON.stringify(req.body.privateKey) }
+                req.body.setKey,
+                JSON.stringify(req.body.setValue)
             )
             .then(() => {
                 dbUsers.findOne({upi: req.body.upi})
@@ -60,6 +61,7 @@ module.exports = {
             })
             .catch(err=>console.log(err))
     },
+
     getAdmin: function (req, res) {
         dbUsers.findAllWhere({role:"admin"})
         .then(admin => {

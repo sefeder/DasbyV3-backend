@@ -91,20 +91,18 @@ findOne = function (searchObject) {
 	})
 }
 
-update = function (searchObject, newData) {
+update = function (searchObject, setKey, setValue) {
 	return new Promise((resolve,reject) =>{
-		const newDate = getTimestamp(new Date());
-		newData.updatedAt = newDate;
-		
+		const newDate = JSON.stringify(getTimestamp(new Date()));
 		dbPool.getConnection(function(error, connection){
 			if (error) {
 				console.log(error)
 			}
 			else{
-				const queryString = 'UPDATE ' + table + ' SET ? WHERE ? ';
+				const queryString = 'UPDATE ' + table + ' SET `' + setKey + '` = ' + setValue +', `updatedAt` = ' + newDate +' WHERE ?';
 				connection.query(
 					queryString, 
-                    [newData, searchObject], 
+                    [searchObject], 
 					function (err, results) {
                         console.log("user model update results: ", results)
 						if (err) {
