@@ -16,35 +16,35 @@ const table = "results";
 /************************************************
  Search
 ************************************************/
-// findOne = function (searchObject) {
-//     return new Promise((resolve, reject) => {
-//         dbPool.getConnection(function (error, connection) {
-//             if (error) {
-//                 console.log(error);
-//             }
-//             else {
-//                 var queryString = 'SELECT * FROM ' + table + ' WHERE ? ORDER BY `createdAt` DESC LIMIT 1';
-//                 connection.query(
-//                     queryString,
-//                     [searchObject],
-//                     function (err, results) {
-//                         if (err) {
-//                             console.log(err);
-//                         }
-//                         else {
-//                             console.log('===============================')
-//                             console.log('results in dia.find: ', results)
-//                             console.log('=============================')
-//                             resolve(results);
-//                         }
-//                     }
-//                 );
-//                 dbPool.releaseConnection(connection);
-//             }
-//         });
-//     })
+findOne = function (upi, testType) {
+    return new Promise((resolve, reject) => {
+        dbPool.getConnection(function (error, connection) {
+            if (error) {
+                console.log(error);
+            }
+            else {
+                var queryString = 'SELECT * FROM ' + table + ' WHERE `upi` = ? AND `testType` = ? ORDER BY `createdAt` DESC LIMIT 1';
+                connection.query(
+                    queryString,
+                    [upi, testType],
+                    function (err, results) {
+                        if (err) {
+                            console.log(err);
+                        }
+                        else {
+                            console.log('===============================')
+                            console.log('results in results.findOne: ', results)
+                            console.log('=============================')
+                            resolve(results);
+                        }
+                    }
+                );
+                dbPool.releaseConnection(connection);
+            }
+        });
+    })
 
-// }
+}
 
 find = function (searchObjectOne, searchObjectTwo) {
     return new Promise((resolve, reject) => {
@@ -63,7 +63,7 @@ find = function (searchObjectOne, searchObjectTwo) {
                         }
                         else {
                             console.log('===============================')
-                            console.log('results in dia.find: ', results)
+                            console.log('results in results.find: ', results)
                             console.log('=============================')
                             resolve(results);
                         }
