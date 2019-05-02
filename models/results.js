@@ -35,7 +35,7 @@ findOne = function (upi, testType) {
                             console.log('===============================')
                             console.log('results in results.findOne: ', results)
                             console.log('=============================')
-                            resolve(results);
+                            resolve(results[0]);
                         }
                     }
                 );

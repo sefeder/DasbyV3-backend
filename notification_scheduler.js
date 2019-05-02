@@ -8,7 +8,7 @@ console.log('Running Notification Scheduler');
 const userModel = require("./models/Users")
 const resultModel = require("./models/results")
 const notificationModel = require("./models/notifications")
-
+const notificationLogic = require ("./notification_logic")
 
 /************************************************
  Variables
@@ -86,18 +86,17 @@ function start() {
     
         allUserData.forEach( user => {
             let userUpi = user.upi;
-            userModel.findOne(userUpi, 'Depression').then(dbResult => {
-                schedulerLogic.shouldNotifyUserWithEnrollmentDateLogic(user, dbResult, allUserNotificationMap[userUpi], function(shouldNotifyBool, notifyCount){
-
+            resultModel.findOne(userUpi, 'Depression').then(lastCompletedSurveyData => {
+                notificationLogic.shouldNotifyUser(user, lastCompletedSurveyData, allUserNotificationMap[userUpi])
+                  .then((shouldNotifyBool, notifyCount)=>{
                     if (shouldNotifyBool) {
-                    //Step 3: Notify user
-                    stepThree(userUpi, notifyCount);
-
+                      //Step 3: Notify user
+                      sendNotification(userUpi, notifyCount);
                     }
                     else{
-                    console.log("Don't notify user " + usersMap[userUpi] + " for survey");
+                      console.log("Don't notify user " + usersMap[userUpi] + " for survey");
                     }
-                });
+                  })
             })
         });
     }
@@ -105,7 +104,7 @@ function start() {
   /************************************************
    // STEP 3: Notify the user for new survey
   ************************************************/
-  function stepThree(userUpi, notifyCount){
+  function sendNotification(userUpi, notifyCount){
   
     console.log('************************************************');
     console.log('STEP 3: Notify the user for new survey');
