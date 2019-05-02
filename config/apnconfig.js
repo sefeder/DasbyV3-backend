@@ -9,20 +9,27 @@ const apnProvider = new apn.Provider({
     production: false
 })
 
-let note = new apn.Notification();
+createNotification = function(noteObject){
+    let note = new apn.Notification();
+    note.expiry = noteObject.expiry
+    note.badge = noteObject.badge;
+    note.alert = noteObject.alert 
+    note.payload = noteObject.payload 
+    note.topic = noteObject.topic
+    return note   
+}
 
-note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-note.badge = 3;
-note.sound = "ping.aiff";
-note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
-note.payload = { 'messageFrom': 'John Appleseed' };
-note.topic = "org.reactjs.native.dasbytest";
 
-apnProvider.send(note, '25b9beec6f31aa16997977c1b65e2c8465bb23af6088cb5793154588f5553993').then((result) => {
-    console.log(result)
-});
+sendNotification = function(note, token){
+    apnProvider.send(note, token)
+    .then((result) => {
+        console.log(result)
+    })
+    .catch(err=>console.log("Error sending notification: ", err));
+}
 
 
 module.exports = {
-    apnProvider
+    createNotification,
+    sendNotification
 }

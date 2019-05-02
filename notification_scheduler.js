@@ -9,6 +9,7 @@ const userModel = require("./models/Users")
 const resultModel = require("./models/results")
 const notificationModel = require("./models/notifications")
 const notificationLogic = require ("./notification_logic")
+const apnNotifcation = require ("./config/apnconfig")
 
 /************************************************
  Variables
@@ -110,7 +111,15 @@ function start() {
     console.log('STEP 3: Notify the user for new survey');
     console.log('************************************************');
     console.log("Notified " + usersMap[userUpi] + " at " + new Date() + " for survey");
-  
+    let note = {}
+    note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+    note.badge = 3;
+    note.sound = "ping.aiff";
+    note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
+    note.payload = { 'messageFrom': 'John Appleseed' };
+    note.topic = "org.reactjs.native.dasbytest";
+    token = '25b9beec6f31aa16997977c1b65e2c8465bb23af6088cb5793154588f5553993'
+
     switch (notifyCount) {
       case 1:
         DasbyActions.read("Notifications", 0, 0, userUpi);
