@@ -4,6 +4,7 @@
   "description": "dasby-backend",
   "main": "server.js",
   "dependencies": {
+    "apn": "^2.2.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
     "events": "^3.0.0",
