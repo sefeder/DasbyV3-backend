@@ -10,6 +10,7 @@ const resultModel = require("./models/results")
 const notificationModel = require("./models/notifications")
 const notificationLogic = require ("./notification_logic")
 const apnNotifcation = require ("./config/apnconfig")
+// const key = "../../Downloads/AuthKey_Y9CWL9QAJ6.p8",
 
 /************************************************
  Variables
@@ -31,15 +32,15 @@ console.log("hour: ");
 console.log(hour);
 
 //Only run this script at certain times
-if (isEven(hour) && (hour >= 14 || hour <= 4) ) {
-  console.log('--STARTING SYMPTOM CHECKIN SCHEDULER--');
-  start();
-}
-else{
-  console.log("--EXITING SYMPTOM CHECKIN SCHEDULER--");
-  process.exit();
-}
-
+// if (isEven(hour) && (hour >= 14 || hour <= 4) ) {
+//   console.log('--STARTING SYMPTOM CHECKIN SCHEDULER--');
+//   start();
+// }
+// else{
+//   console.log("--EXITING SYMPTOM CHECKIN SCHEDULER--");
+//   process.exit();
+// }
+start()
 /************************************************
  // STEP 1: Get all users + notifications in arrays 
 ************************************************/
@@ -65,12 +66,15 @@ function start() {
         
         // Get user notification data
         for(let i=0; i < allUserData.length; i++){
+            console.log("hitting for loop in step 1")
             let user = allUserData[i]
-            notificationModel.findOne(user.upi,0).then(notification => {
+            notificationModel.findOne(user.upi,0)
+            .then(notification => {
+              console.log("notification: ", notification)
                 allUserNotificationMap[user.upi] = notification;
                 // Move to step #2
-                if (i == allUserData.length) { checkForSurveyCompletion(); };
-            })
+                if (i == allUserData.length-1) { checkForSurveyCompletion(); };
+            }).catch(err=>console.log("error in notificationModel.findOne: ", err))
         }
       })
   
@@ -87,57 +91,66 @@ function start() {
     
         allUserData.forEach( user => {
             let userUpi = user.upi;
-            resultModel.findOne(userUpi, 'Depression').then(lastCompletedSurveyData => {
-                notificationLogic.shouldNotifyUser(user, lastCompletedSurveyData, allUserNotificationMap[userUpi])
-                  .then((shouldNotifyBool, notifyCount)=>{
-                    if (shouldNotifyBool) {
-                      //Step 3: Notify user
-                      sendNotification(userUpi, notifyCount);
-                    }
-                    else{
-                      console.log("Don't notify user " + usersMap[userUpi] + " for survey");
-                    }
-                  })
-            })
+            let push_token = user.push_token
+            console.log("push_token: ", push_token)
+            scheduleCorrectNotification(userUpi, push_token,1)
+            // resultModel.findOne(userUpi, 'Depression').then(lastCompletedSurveyData => {
+            //     notificationLogic.shouldNotifyUser(user, lastCompletedSurveyData, allUserNotificationMap[userUpi])
+            //       .then((shouldNotifyBool, notifyCount)=>{
+            //         if (shouldNotifyBool) {
+            //           //Step 3: Notify user
+            //           scheduleCorrectNotification(userUpi, push_token, notifyCount);
+            //         }
+            //         else{
+            //           console.log("Don't notify user " + usersMap[userUpi] + " for survey");
+            //         }
+            //       })
+            // })
         });
     }
   
   /************************************************
    // STEP 3: Notify the user for new survey
   ************************************************/
-  function sendNotification(userUpi, notifyCount){
-  
-    console.log('************************************************');
-    console.log('STEP 3: Notify the user for new survey');
-    console.log('************************************************');
-    console.log("Notified " + usersMap[userUpi] + " at " + new Date() + " for survey");
-    let note = {}
-    note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-    note.badge = 3;
-    note.sound = "ping.aiff";
-    note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
-    note.payload = { 'messageFrom': 'John Appleseed' };
-    note.topic = "org.reactjs.native.dasbytest";
-    token = '25b9beec6f31aa16997977c1b65e2c8465bb23af6088cb5793154588f5553993'
+  function scheduleCorrectNotification(userUpi, push_token, notifyCount){
 
-    switch (notifyCount) {
-      case 1:
-        DasbyActions.read("Notifications", 0, 0, userUpi);
-      break;
-  
-      case 2:
-        DasbyActions.read("Notifications", 0, 1, userUpi);
-      break;
-  
-      case 3:
-        DasbyActions.read("Notifications", 0, 2, userUpi);
-      break;
-  
-      default:
-        DasbyActions.read("Notifications", 0, 0, userUpi);
-      break;
-    }
+    if (push_token){
+      console.log('************************************************');
+      console.log('STEP 3: Notify the user for new survey');
+      console.log('************************************************');
+      console.log("Notified " + usersMap[userUpi] + " at " + new Date() + " for survey");
+      
+      let note = {}
+      // note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+      note.badge = 1;
+      note.payload = { 'messageFrom': 'Dasby' };
+      note.topic = "org.reactjs.native.dasbytest";
+      
+      switch (notifyCount) {
+        case 1:
+          note.alert = "Do you have a minute to take this week's survey?";
+          apnNotifcation.sendNotification(note, push_token)
+        break;
     
+        case 2:
+          note.alert = "You missed your survey yesterday. Do you have time right now?";
+          apnNotifcation.sendNotification(note, push_token)
+        break;
+    
+        case 3:
+          note.alert = "Hey, you've missed a couple of days. Would now be a good time to check in?";
+          apnNotifcation.sendNotification(note, push_token)
+        break;
+    
+        default:
+          note.alert = "Do you have a minute to take this week's survey?";
+          apnNotifcation.sendNotification(note, push_token)
+        break;
+      }
+    } else {
+      console.log('Could not find push token for ' + usersMap[userUpi])
+      return;
+    }
   }
 
 

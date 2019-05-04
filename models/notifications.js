@@ -6,7 +6,7 @@ const dbPool = require("../mysql/db");
 /************************************************
  Tables 
 ************************************************/
-const table = "notification";
+const table = "notifications";
 
 /************************************************
  Queries for User Controller

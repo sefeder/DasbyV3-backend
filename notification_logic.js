@@ -24,16 +24,16 @@ shouldNotifyUser = function(userData, lastSurveyData, lastNotificationData){
     // Establish Date Variables
     const dateEnrolled = moment(userData.createdAt)
     const currentWeekNumber = Math.floor((moment()-dateEnrolled)/ (1000*60*60*24*7))+1
-    const dateLastNotification =  moment(lastNotificationData.createdAt)
-    const minutesSinceLastNotification = (moment()-dateLastNotification)/(1000*60)
+    const dateLastNotification =  moment(lastNotificationData.createdAt) || null
+    const minutesSinceLastNotification = (moment()-dateLastNotification)/(1000*60) || null
     let notifyCount = lastNotificationData.notifyCount
-    const lastNotificationWeekNumber = Math.floor((dateLastNotification-dateEnrolled)/ (1000*60*60*24*7))+1
+    const lastNotificationWeekNumber = Math.floor((dateLastNotification-dateEnrolled)/ (1000*60*60*24*7))+1 || null
 
     const dateCurrentWeekSurvey = dateEnrolled.add(currentWeekNumber-1,"weeks").startOf("day")
     const dateNextWeekSurvey = dateEnrolled.add(currentWeekNumber,"weeks").startOf("day")
     
     let isNewWeek
-    if(currentWeekNumber > lastNotificationWeekNumber){
+    if (currentWeekNumber > lastNotificationWeekNumber || lastNotificationWeekNumber == null){
         isNewWeek = true
     }else{
         isNewWeek = false
@@ -72,15 +72,17 @@ shouldNotifyUser = function(userData, lastSurveyData, lastNotificationData){
             resolve(false)
         }else{
             // check that they have not been notified in the last 24 hours
-            if(minutesSinceLastNotification > cadence){
+            if (minutesSinceLastNotification > cadence || minutesSinceLastNotification == null){
                 // if today is survey day, set notify count to 1
                 if(dateOfCurrentSurvey == moment().startOf("day")) {
                     notifyCount = 1
+                } else if (minutesSinceLastNotification==null){
+                    notifyCount = 0
                 }
                 else{
                     notifyCount++
                 }
-                updateNotificationsTable(userData, notifyCount, 0, "Depression Checkin");
+                createNotificationInTable(userData, notifyCount, 0, "Depression Checkin");
                 resolve(true, notifyCount);
             }
         }
@@ -91,7 +93,7 @@ shouldNotifyUser = function(userData, lastSurveyData, lastNotificationData){
 /************************************************
  HELPERS
 ************************************************/
-updateNotificationsTable = function(userData, notifyCount,surveType,surveyName){
+createNotificationInTable = function(userData, notifyCount,surveType,surveyName){
     notificationModel.create({
         upi: userData.upi,
         surveyType: surveType,
