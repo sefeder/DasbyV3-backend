@@ -6,7 +6,7 @@ const dbPool = require("../mysql/db");
 /************************************************
  Tables 
 ************************************************/
-const table = "results";
+const table = "bloodPressure";
 
 /************************************************
  Queries 
@@ -46,24 +46,24 @@ findOne = function (upi, testType) {
 
 }
 
-find = function (searchObjectOne, searchObjectTwo) {
+find = function (searchObjectOne) {
     return new Promise((resolve, reject) => {
         dbPool.getConnection(function (error, connection) {
             if (error) {
                 console.log(error);
             }
             else {
-                var queryString = 'SELECT * FROM ' + table + ' WHERE ? AND ? ORDER BY `createdAt` DESC LIMIT 24';
+                var queryString = 'SELECT * FROM ' + table + ' WHERE ? ORDER BY `createdAt` DESC LIMIT 24';
                 connection.query(
                     queryString,
-                    [searchObjectOne, searchObjectTwo],
+                    [searchObjectOne],
                     function (err, results) {
                         if (err) {
                             console.log(err);
                         }
                         else {
                             console.log('===============================')
-                            console.log('results in results.find: ', results)
+                            console.log('measurements in bp.find: ', results)
                             console.log('=============================')
                             resolve(results);
                         }
@@ -79,11 +79,11 @@ find = function (searchObjectOne, searchObjectTwo) {
 /************************************************
  Saving/Creating new Result 
 ************************************************/
-create = function (resultData) {
+create = function (measurementData) {
     return new Promise((resolve, reject) => {
         var date = getTimestamp(new Date());
-        resultData.createdAt = date;
-        resultData.updatedAt = date;
+        measurementData.createdAt = date;
+        measurementData.updatedAt = date;
 
         dbPool.getConnection(function (error, connection) {
             if (error) {
@@ -93,9 +93,9 @@ create = function (resultData) {
                 let queryString = 'INSERT INTO ' + table + ' SET ?';
                 connection.query(
                     queryString,
-                    resultData,
+                    measurementData,
                     function (err, results) {
-                        console.log("result model create results: ", results)
+                        console.log("bloodPressure model create measurement: ", results)
                         if (err) {
                             console.log(err);
                         }

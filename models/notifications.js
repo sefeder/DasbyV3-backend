@@ -6,7 +6,7 @@ const dbPool = require("../mysql/db");
 /************************************************
  Tables 
 ************************************************/
-const table = "users";
+const table = "notifications";
 
 /************************************************
  Queries for User Controller
@@ -18,9 +18,9 @@ findAll = function () {
 				  console.log(error);
 			}
 			else{
-				const queryString = "SELECT * FROM users ORDER BY `createdAt`";
+				const queryString = "SELECT * FROM " + table + " ORDER BY `createdAt`";
 				connection.query(
-					"SELECT * FROM users ORDER BY `createdAt`",
+					queryString,
 					[],
 					function(err, results) {
 						if (err) {
@@ -37,7 +37,8 @@ findAll = function () {
 		});
 	})
 }
-findAllWhere = function (searchObject) {
+
+findOne = function (upi, surveyType) {
 	return new Promise((resolve,reject) =>{
 		dbPool.getConnection(function(error, connection){
 
@@ -45,37 +46,10 @@ findAllWhere = function (searchObject) {
 				console.log(error);
 			}
 			else{
-				const queryString = 'SELECT * FROM ' +  table + ' WHERE ? ORDER BY `createdAt` DESC';
+				const queryString = 'SELECT * FROM ' +  table + ' WHERE `upi` = ? AND `surveyType` = ? ORDER BY `createdAt` DESC LIMIT 1';
 				connection.query(
 				queryString,
-				[searchObject],
-				function(err, results) {
-					if (err) {
-						console.log(err);
-					}
-					else{
-						resolve(results);
-					}
-				}
-				);
-				dbPool.releaseConnection(connection);
-			}
-		});
-	})
-}
-
-findOne = function (searchObject) {
-	return new Promise((resolve,reject) =>{
-		dbPool.getConnection(function(error, connection){
-
-			if (error) {
-				console.log(error);
-			}
-			else{
-				const queryString = 'SELECT * FROM ' +  table + ' WHERE ? ORDER BY `createdAt` DESC LIMIT 1';
-				connection.query(
-				queryString,
-				[searchObject],
+				[upi, surveyType],
 				function(err, results) {
 					if (err) {
 						console.log(err);
@@ -104,7 +78,7 @@ update = function (searchObject, setKey, setValue) {
 					queryString, 
                     [searchObject], 
 					function (err, results) {
-                        console.log("user model update results: ", results)
+                        console.log("notifiaction model update results: ", results)
 						if (err) {
 							console.log(err);
 						}
@@ -118,11 +92,11 @@ update = function (searchObject, setKey, setValue) {
 	})
 }
 
-create = function(userData) {
+create = function(notificationData) {
 	return new Promise((resolve,reject)=>{
 		var date = getTimestamp(new Date());
-		userData.createdAt = date;
-		userData.updatedAt = date;	    	
+		notificationData.createdAt = date;
+		notificationData.updatedAt = date;	    	
 
 		dbPool.getConnection(function(error, connection){
 			if (error) {
@@ -132,9 +106,9 @@ create = function(userData) {
 				let queryString = 'INSERT INTO ' + table + ' SET ?';
 				connection.query(
 					queryString, 
-					userData, 
+					notificationData, 
 					function(err, results) {
-                        console.log("user model create results: ", results)
+                        console.log("notification model create results: ", results)
 						if (err) {
 							console.log(err);
 						}
