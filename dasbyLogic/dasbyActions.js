@@ -1,12 +1,11 @@
 const twilio = require('./dasbyTwilio')
-const virgil = require('./dasbyVirgil')
 const dialogue = require('../models/dialogue')
 const Users = require('../models/Users')
 
 
 const sendResponse = (channel, message) => {
-    console.log('send response hit!!!')
-    channel.sendMessage(virgil.encryptMessage(channel, message))
+    console.log('send response ht!!!')
+    channel.sendMessage(message)
 }
 
 dasbyRead = (channelSid, chapter, section, block) => {
@@ -39,16 +38,13 @@ handleNewMessage = (channelSid, body, author) => {
         if (author !== dasby.upi ) {
             twilio.getChannelAsDasby(dasby.upi, channelSid)
             .then(currentChannel =>{
-                console.log("handleNewMessage currentChannel: ", currentChannel)
-                const decryptedMessageString = virgil.decryptMessage(currentChannel, body, dasby.private_key, dasby.upi)
-                console.log('decryptedMessageString: ', decryptedMessageString)
-                // parse decryptedMessage for chapter, section, and block and pass in to sendResponse
+                console.log("handleNewMessage hit")
                 // the below case will only be false if the user types a free response message (not a json object)
-                if (canParseStr(decryptedMessageString)) {
-                    const decryptedMessage = JSON.parse(decryptedMessageString)
+                if (canParseStr(body)) {
                     //NEED TO ASK JONNY: why do some rows have a payload without a block? thats why we added the bottom
-                    if (decryptedMessage.chapter !== 'Survey') {
-                        dialogue.find(decryptedMessage.chapter, decryptedMessage.section, decryptedMessage.block || 0).then(allSectionData => {
+                    const message = JSON.parse(body)
+                    if (message.chapter !== 'Survey') {
+                        dialogue.find(message.chapter, message.section, message.block || 0).then(allSectionData => {
                             let iteration = 0;
                             let currentBlockData = allSectionData[0];
                             messageRouter(currentChannel, allSectionData, currentBlockData, iteration);
