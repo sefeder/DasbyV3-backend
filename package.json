@@ -16,7 +16,7 @@
     "react-native-phone-call": "^1.0.9",
     "sequelize": "^4.38.0",
     "twilio": "^3.19.2",
-    "twilio-chat": "^3.0.2",
+    "twilio-chat": "^6.0.0",
     "util": "^0.11.0",
     "virgil-crypto": "^3.2.0",
     "virgil-sdk": "^5.0.0-alpha.2"
